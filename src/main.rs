@@ -1,61 +1,35 @@
-use crate::models::{Collection, Notes, Release};
+#![allow(dead_code)]
+use crate::api::collections::*;
+use crate::models::client::DiscogsClient;
+use crate::models::collections::*;
 use dotenv::dotenv;
-use reqwest;
 use std::error::Error;
 use tokio;
 extern crate serde_derive;
-use std::time::Instant;
 
+mod api;
 mod models;
-
-const BASE_URL: &str = "https://api.discogs.com";
-const DEFAULT_FOLDER_ID: isize = 0;
-const USERNAME: &str = "DanielBatesJ";
+#[cfg(test)]
+mod tests;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     dotenv().ok();
-    let user_token = dotenv::var("DISCOGS_USER_TOKEN").unwrap();
-    let start = Instant::now();
-    let mut collection = collections(&user_token).await?;
-    let duration = start.elapsed();
+    let user_token = dotenv::var("DISCOGS_USER_TOKEN")
+        .expect("Ensure you have a .env in the project root with a valid \"DISCOGS_USER_TOKEN\"");
+    let client = DiscogsClient::new(&user_token, "Rust Script DanielBatesJ", "DanielBatesJ");
+    let mut collection = get_collection_folder(&client, None).await?;
     add_price(&mut collection).await;
+    // sort_by_price(&mut collection).await;
     // display(&collection).await;
-    sort_by_price(&mut collection).await;
-    display(&collection).await;
     let total_spend = sum_spend(&collection).await;
-    println!("{total_spend}");
-    println!(
-        "Time elapsed collecting the data from the API is: {:?}",
-        duration
-    );
-    Ok(())
-}
+    println!("Total spent according to price tracking: ${total_spend}");
 
-async fn collections(user_token: &str) -> Result<Vec<Release>, Box<dyn Error>> {
-    let client = reqwest::Client::new();
-    let mut response;
-    let mut current = format!(
-        "{BASE_URL}/users/{USERNAME}/collection/folders/{DEFAULT_FOLDER_ID}/releases?token={user_token}");
-    let mut collection: Vec<Release> = Vec::new();
-    loop {
-        response = client
-            .get(&current)
-            .header(
-                reqwest::header::USER_AGENT,
-                "Rust script test DanielBatesJ)",
-            )
-            .send()
-            .await?
-            .json::<Collection>()
-            .await?;
-        collection.append(&mut response.releases); // push them here
-        if response.pagination.page != response.pagination.pages {
-            current = response.pagination.urls.next.unwrap();
-        } else {
-            break Ok(collection);
-        }
-    }
+    let collection_value = get_collection_value(&client).await?.convert_to_float();
+    println!("Maximum collection value: ${}", collection_value.maximum);
+    println!("Median collection value:  ${}", collection_value.median);
+    println!("Minimum collection value: ${}", collection_value.minimum);
+    Ok(())
 }
 
 async fn sort_by_price(collection: &mut Vec<Release>) {
@@ -85,7 +59,8 @@ async fn add_price(collection: &mut Vec<Release>) {
                 .find(|x| x.field_id.try_into() == Ok(Notes::Price))
             {
                 Some(
-                    note.value.split("$").collect::<Vec<&str>>()[1]
+                    note.value
+                        .replace(&['$', ','], "")
                         .trim()
                         .parse::<f32>()
                         .unwrap(),
