@@ -10,15 +10,11 @@ use reqwest;
 /// GET /users/{username}/collection/folders
 ///
 pub async fn get_collection_folders(client: &DiscogsClient) -> Result<Vec<Folder>, reqwest::Error> {
-    let url = format!(
-        "{}/users/{}/collection/folders?token={}",
-        &client.api_endpoint, &client.username, &client.user_token,
-    );
     let f = client
-        .http_client
-        .get(&url)
-        .header(reqwest::header::USER_AGENT, &client.user_agent)
-        .send()
+        .api_call(&format!(
+            "{}/users/{}/collection/folders?token={}",
+            &client.api_endpoint, &client.username, &client.user_token,
+        ))
         .await?
         .json::<Folders>()
         .await?;
@@ -78,15 +74,11 @@ pub async fn get_collection_items_by_folder(
 
 /// GET /users/{username}/collection/fields
 pub async fn get_list_custom_fields(client: &DiscogsClient) -> Result<Vec<Field>, reqwest::Error> {
-    let url = format!(
-        "{}/users/{}/collection/fields?token={}",
-        &client.api_endpoint, &client.username, &client.user_token,
-    );
     let f = client
-        .http_client
-        .get(&url)
-        .header(reqwest::header::USER_AGENT, &client.user_agent)
-        .send()
+        .api_call(&format!(
+            "{}/users/{}/collection/fields?token={}",
+            &client.api_endpoint, &client.username, &client.user_token,
+        ))
         .await?
         .json::<Fields>()
         .await?;
@@ -104,10 +96,7 @@ async fn pagination_releases_loop(
     let mut collection: Vec<Release> = Vec::new();
     loop {
         response = client
-            .http_client
-            .get(current)
-            .header(reqwest::header::USER_AGENT, &client.user_agent)
-            .send()
+            .api_call(&current)
             .await?
             .json::<Collection>()
             .await?;
@@ -124,15 +113,11 @@ async fn pagination_releases_loop(
 pub async fn get_collection_value(
     client: &DiscogsClient,
 ) -> Result<CollectionValue, reqwest::Error> {
-    let url = format!(
-        "{}/users/{}/collection/value?token={}",
-        &client.api_endpoint, &client.username, &client.user_token,
-    );
     client
-        .http_client
-        .get(&url)
-        .header(reqwest::header::USER_AGENT, &client.user_agent)
-        .send()
+        .api_call(&format!(
+            "{}/users/{}/collection/value?token={}",
+            &client.api_endpoint, &client.username, &client.user_token,
+        ))
         .await?
         .json::<CollectionValue>()
         .await

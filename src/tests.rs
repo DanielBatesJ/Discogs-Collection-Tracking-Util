@@ -33,6 +33,18 @@ async fn database_endpoints() {
     let a = get_release_database(&cli, 1097885, Some(CurrAbbr::USD)).await;
     assert!(a.is_ok());
     // println!("{a:#?}");
+    let b = get_release_rating_by_user(&cli, 26048068, "DanielBatesJ").await;
+    assert!(b.is_ok());
+    // println!("{b:#?}");
+    let c = get_community_release_rating(&cli, 26048068).await;
+    assert!(c.is_ok());
+    // println!("{c:#?}");
+    let d = get_release_stats(&cli, 1097885).await;
+    assert!(d.is_ok());
+    // println!("{d:#?}");
+    let e = get_master_release(&cli, 484590).await;
+    assert!(e.is_ok());
+    // println!("{e:#?}");
 }
 
 //

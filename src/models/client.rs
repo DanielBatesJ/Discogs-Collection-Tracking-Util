@@ -1,3 +1,4 @@
+use reqwest::{Error, Response};
 const BASE_URL: &str = "https://api.discogs.com";
 
 #[derive(Debug)]
@@ -21,5 +22,12 @@ impl DiscogsClient {
     }
     pub fn custome_endpoint(&mut self, endpoint: &str) {
         self.api_endpoint = endpoint.to_string()
+    }
+    pub async fn api_call(&self, url: &str) -> Result<Response, Error> {
+        self.http_client
+            .get(url)
+            .header(reqwest::header::USER_AGENT, &self.user_agent)
+            .send()
+            .await
     }
 }

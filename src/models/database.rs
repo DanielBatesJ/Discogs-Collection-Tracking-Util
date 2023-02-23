@@ -161,6 +161,50 @@ pub struct Image {
     pub height: i64,
 }
 
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+pub struct UserRating {
+    pub release_id: i64,
+    pub username: String,
+    pub rating: i64,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct DatabaseRatings {
+    pub release_id: i64,
+    pub rating: Rating,
+}
+
+// TODO: This is weird, it should only return num_have and num_want but does not ever return it.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct DatabaseStats {
+    num_have: Option<i32>,
+    num_want: Option<i32>,
+    is_offensive: Option<bool>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct MasterRelease {
+    pub id: i64,
+    pub main_release: i64,
+    pub most_recent_release: i64,
+    pub resource_url: String,
+    pub uri: String,
+    pub versions_url: String,
+    pub main_release_url: String,
+    pub most_recent_release_url: String,
+    pub num_for_sale: i64,
+    pub lowest_price: f64,
+    pub images: Vec<Image>,
+    pub genres: Vec<String>,
+    pub styles: Vec<String>,
+    pub year: i64,
+    pub tracklist: Vec<Tracklist>,
+    pub artists: Vec<Artist>,
+    pub title: String,
+    pub data_quality: String,
+    pub videos: Vec<Video>,
+}
+
 // Custom
 
 pub enum CurrAbbr {
