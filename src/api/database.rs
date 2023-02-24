@@ -1,6 +1,5 @@
-use crate::models::{client::DiscogsClient, database::*};
+use crate::models::{client::DiscogsClient, collections::SortOrder, database::*};
 use reqwest;
-use serde_derive::Deserialize;
 
 /// GET requests do NOT require a token for authentication for these endpoints.
 
@@ -79,5 +78,37 @@ pub async fn get_master_release(
         .api_call(&format!("{}/masters/{}", &client.api_endpoint, &master_id))
         .await?
         .json::<MasterRelease>()
+        .await
+}
+
+/// GET /masters/{master_id}/versions{?page,per_page}
+///
+/// TODO: Bring in SortMasterVersions.
+/// TODO: Build better mechanisms around pagination.
+///
+/// Returns information about the authenticated user's wantlist/collection.
+///
+/// Default is page=1, per_page=50
+pub async fn get_master_release_versions(
+    client: &DiscogsClient,
+    master_id: i64,
+    page: Option<i64>,
+    per_page: Option<i64>,
+    sort: Option<SortMasterVersions>,
+    sort_order: Option<SortOrder>,
+) -> Result<MasterVersions, reqwest::Error> {
+    client
+        .api_call(&format!(
+            "{}/masters/{}/versions?page={}&per_page={}&sort={}&sort_order={}&token={}",
+            &client.api_endpoint,
+            &master_id,
+            page.unwrap_or(1),
+            per_page.unwrap_or(50),
+            sort.unwrap_or(SortMasterVersions::Label).to_string(),
+            sort_order.unwrap_or(SortOrder::Asc).to_string(),
+            client.user_token,
+        ))
+        .await?
+        .json::<MasterVersions>()
         .await
 }

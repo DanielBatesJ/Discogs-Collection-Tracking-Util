@@ -1,5 +1,5 @@
 use crate::api::{collections::*, database::*};
-use crate::models::{client::*, database::*};
+use crate::models::{client::*, collections::*, database::*};
 
 #[tokio::test]
 async fn collections_endpoints() {
@@ -45,6 +45,17 @@ async fn database_endpoints() {
     let e = get_master_release(&cli, 484590).await;
     assert!(e.is_ok());
     // println!("{e:#?}");
+    let f = get_master_release_versions(
+        &cli,
+        9478,
+        Some(1),
+        Some(55),
+        Some(SortMasterVersions::Released),
+        Some(SortOrder::Asc),
+    )
+    .await;
+    assert!(f.is_ok());
+    // println!("{f:#?}");
 }
 
 //

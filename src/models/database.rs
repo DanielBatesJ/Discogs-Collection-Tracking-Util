@@ -1,6 +1,8 @@
+use crate::models::collections::Pagination;
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 use serde_json::Value;
+use std::collections::HashMap;
 use std::fmt;
 
 // Auto-generated
@@ -87,11 +89,11 @@ pub struct Format {
 pub struct Community {
     pub have: i64,
     pub want: i64,
-    pub rating: Rating,
-    pub submitter: Submitter,
-    pub contributors: Vec<Contributor>,
-    pub data_quality: String,
-    pub status: String,
+    pub rating: Option<Rating>,
+    pub submitter: Option<Submitter>,
+    pub contributors: Option<Vec<Contributor>>,
+    pub data_quality: Option<String>,
+    pub status: Option<String>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -205,6 +207,76 @@ pub struct MasterRelease {
     pub videos: Vec<Video>,
 }
 
+/// Master Versions
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct MasterVersions {
+    pub pagination: Pagination,
+    pub filters: Filters,
+    pub filter_facets: Vec<FilterFacet>,
+    pub versions: Vec<Version>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Filters {
+    pub applied: Applied,
+    pub available: Available,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Applied {}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Available {
+    pub format: HashMap<String, i64>,
+    pub label: HashMap<String, i64>,
+    pub country: HashMap<String, i64>,
+    pub released: HashMap<String, i64>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct FilterFacet {
+    pub title: String,
+    pub id: String,
+    pub values: Vec<DiscogsValue>,
+    pub allows_multiple_values: bool,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct DiscogsValue {
+    pub title: String,
+    pub value: String,
+    pub count: i64,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Version {
+    pub id: i64,
+    pub label: String,
+    pub country: String,
+    pub title: String,
+    pub major_formats: Vec<String>,
+    pub format: String,
+    pub catno: String,
+    pub released: String,
+    pub status: String,
+    pub resource_url: String,
+    pub thumb: String,
+    pub stats: Stats,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Stats {
+    pub user: Option<CollectionWantlist>,
+    pub community: Option<CollectionWantlist>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct CollectionWantlist {
+    pub in_collection: i64,
+    pub in_wantlist: i64,
+}
+
 // Custom
 
 pub enum CurrAbbr {
@@ -237,6 +309,27 @@ impl fmt::Display for CurrAbbr {
             CurrAbbr::NZD => write!(f, "NZD"),
             CurrAbbr::SEK => write!(f, "SEK"),
             CurrAbbr::ZAR => write!(f, "ZAR"),
+        }
+    }
+}
+pub enum SortMasterVersions {
+    Released, // Year
+    Title,
+    Format,
+    Label,
+    Catno,
+    Country,
+}
+
+impl fmt::Display for SortMasterVersions {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            SortMasterVersions::Label => write!(f, "label"),
+            SortMasterVersions::Title => write!(f, "title"),
+            SortMasterVersions::Catno => write!(f, "catno"),
+            SortMasterVersions::Format => write!(f, "format"),
+            SortMasterVersions::Released => write!(f, "released"),
+            SortMasterVersions::Country => write!(f, "country"),
         }
     }
 }
