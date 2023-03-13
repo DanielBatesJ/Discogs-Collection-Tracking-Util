@@ -1,9 +1,11 @@
-use crate::models::collections::Pagination;
+use crate::models::collections::{Pagination, SortOrder};
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fmt;
+
+use super::collections::Sort;
 
 // Auto-generated
 
@@ -277,7 +279,194 @@ pub struct CollectionWantlist {
     pub in_wantlist: i64,
 }
 
+/// For Artist Queries, more information than is kept in a standard Artist Result, which is defined above.
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ArtistPage {
+    pub name: String,
+    pub id: i64,
+    pub resource_url: String,
+    pub uri: String,
+    pub releases_url: String,
+    pub images: Vec<Image>,
+    pub profile: String,
+    pub urls: Vec<String>,
+    pub namevariations: Vec<String>,
+    pub aliases: Option<Vec<Alias>>,
+    pub members: Option<Vec<Member>>,
+    pub data_quality: String,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Alias {
+    pub id: i64,
+    pub name: String,
+    pub resource_url: String,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Member {
+    pub id: i64,
+    pub name: String,
+    pub resource_url: String,
+    pub active: bool,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SearchResults {
+    pub pagination: Pagination,
+    pub results: Vec<SearchResult>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SearchResult {
+    pub id: i64,
+    #[serde(rename = "type")]
+    pub type_field: String,
+    pub user_data: Option<CollectionWantlist>,
+    pub master_id: Option<i64>,
+    pub master_url: Option<String>,
+    pub uri: String,
+    pub title: String,
+    pub thumb: String,
+    pub cover_image: Option<String>,
+    pub resource_url: Option<String>,
+    pub country: Option<String>,
+    pub year: Option<String>,
+    #[serde(default)]
+    pub format: Vec<String>,
+    #[serde(default)]
+    pub label: Vec<String>,
+    #[serde(default)]
+    pub genre: Vec<String>,
+    #[serde(default)]
+    pub style: Vec<String>,
+    #[serde(default)]
+    pub barcode: Vec<String>,
+    pub catno: Option<String>,
+    pub community: Option<Community>,
+    pub format_quantity: Option<i64>,
+    #[serde(default)]
+    pub formats: Vec<Format>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ArtistReleases {
+    pub pagination: Pagination,
+    pub releases: Vec<ArtistRelease>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ArtistRelease {
+    pub id: i64,
+    pub status: Option<String>,
+    #[serde(rename = "type")]
+    pub release_type: String,
+    pub format: Option<String>,
+    pub label: Option<String>,
+    pub title: String,
+    pub resource_url: String,
+    pub role: String,
+    pub artist: String,
+    pub year: i64,
+    pub thumb: String,
+    pub stats: Stats,
+    pub main_release: Option<i64>,
+    pub trackinfo: Option<String>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct LabelPage {
+    pub id: i64,
+    pub name: String,
+    pub resource_url: String,
+    pub uri: String,
+    pub releases_url: String,
+    pub images: Vec<Image>,
+    pub contact_info: String,
+    pub profile: String,
+    pub parent_label: ParentLabel,
+    pub data_quality: String,
+    pub urls: Vec<String>,
+    pub sublabels: Vec<Sublabel>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ParentLabel {
+    pub id: i64,
+    pub name: String,
+    pub resource_url: String,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Sublabel {
+    pub id: i64,
+    pub name: String,
+    pub resource_url: String,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct LabelReleases {
+    pub pagination: Pagination,
+    pub releases: Vec<LabelRelease>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct LabelRelease {
+    pub id: i64,
+    pub year: i64,
+    pub status: String,
+    pub format: String,
+    pub catno: String,
+    pub thumb: String,
+    pub resource_url: String,
+    pub title: String,
+    pub artist: String,
+}
+
 // Custom
+
+/// Struct for the query parameters to search the Discogs Database.
+/// query           - string (optional) Example: nirvana                 - Your search query
+/// type            - string (optional) Example: release                 - String. One of release, master, artist, label
+/// title           - string (optional) Example: nirvana - nevermind     - Search by combined “Artist Name - Release Title” title field.
+/// release_title   - string (optional) Example: nevermind               - Search release titles.
+/// credit          - string (optional) Example: kurt                    - Search release credits.
+/// artist          - string (optional) Example: nirvana                 - Search artist names.
+/// anv             - string (optional) Example: nirvana                 - Search artist ANV.
+/// label           - string (optional) Example: dgc                     - Search label names.
+/// genre           - string (optional) Example: rock                    - Search genres.
+/// style           - string (optional) Example: grunge                  - Search styles.
+/// country         - string (optional) Example: canada                  - Search release country.
+/// year            - string (optional) Example: 1991                    - Search release year.
+/// format          - string (optional) Example: album                   - Search formats.
+/// catno           - string (optional) Example: DGCD-24425              - Search catalog number.
+/// barcode         - string (optional) Example: 7 2064-24425-2 4        - Search barcodes.
+/// track           - string (optional) Example: smells like teen spirit - Search track titles.
+/// submitter       - string (optional) Example: milKt                   - Search submitter username.
+/// contributor     - string (optional) Example: jerome99                - Search contributor usernames.
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SearchParams {
+    pub query: Option<String>,
+    #[serde(rename = "type")]
+    pub search_type: Option<String>,
+    pub title: Option<String>,
+    pub release_title: Option<String>,
+    pub credit: Option<String>,
+    pub artist: Option<String>,
+    pub anv: Option<String>,
+    pub label: Option<String>,
+    pub genre: Option<String>,
+    pub style: Option<String>,
+    pub country: Option<String>,
+    pub year: Option<String>,
+    pub format: Option<String>,
+    pub catno: Option<String>,
+    pub barcode: Option<String>,
+    pub track: Option<String>,
+    pub submitter: Option<String>,
+    pub contributor: Option<String>,
+}
 
 pub enum CurrAbbr {
     USD,
@@ -330,6 +519,53 @@ impl fmt::Display for SortMasterVersions {
             SortMasterVersions::Format => write!(f, "format"),
             SortMasterVersions::Released => write!(f, "released"),
             SortMasterVersions::Country => write!(f, "country"),
+        }
+    }
+}
+
+pub enum SortArtist {
+    Year,
+    Title,
+    Format,
+}
+
+pub struct PaginationParams {
+    pub page: i64,
+    pub per_page: i64,
+}
+
+impl Default for PaginationParams {
+    fn default() -> Self {
+        PaginationParams {
+            page: 1,
+            per_page: 50,
+        }
+    }
+}
+
+pub struct SortAndPaginationArtistReleases {
+    pub sort: Option<SortArtist>,
+    pub sort_order: Option<SortOrder>,
+    pub page: Option<i64>,
+    pub per_page: Option<i64>,
+}
+// TODO: Make this more elegant.
+impl Default for SortAndPaginationArtistReleases {
+    fn default() -> Self {
+        SortAndPaginationArtistReleases {
+            sort: Some(SortArtist::Year),
+            sort_order: Some(SortOrder::Asc),
+            page: Some(1),
+            per_page: Some(50),
+        }
+    }
+}
+impl fmt::Display for SortArtist {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            SortArtist::Year => write!(f, "year"),
+            SortArtist::Title => write!(f, "title"),
+            SortArtist::Format => write!(f, "format"),
         }
     }
 }

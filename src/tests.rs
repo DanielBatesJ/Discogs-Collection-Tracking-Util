@@ -56,6 +56,33 @@ async fn database_endpoints() {
     .await;
     assert!(f.is_ok());
     // println!("{f:#?}");
+    let g = get_artist(&cli, 101028).await;
+    // println!("{:#?}", g);
+    assert!(g.is_ok());
+    let h = get_artist_releases(&cli, 101028, SortAndPaginationArtistReleases::default()).await;
+    // println!("{:#?}", h);
+    assert!(h.is_ok());
+    let i = get_label(&cli, 681).await;
+    // println!("{:#?}", i);
+    assert!(i.is_ok());
+    let j = get_label_releases(&cli, 681, PaginationParams::default()).await;
+    // println!("{:#?}", j);
+    assert!(j.is_ok());
+}
+
+#[tokio::test]
+async fn database_search() {
+    let user_token = dotenv::var("DISCOGS_USER_TOKEN")
+        .expect("Ensure you have a .env in the project root with a valid \"DISCOGS_USER_TOKEN\"");
+    let cli = DiscogsClient::new(&user_token, "Rust Script DanielBatesJ", "DanielBatesJ");
+    let mut params = SearchParams::default();
+    params.artist = Some("Rush".to_string());
+    params.catno = Some("54437-0".to_string());
+    let _a = build_parameters_format(&cli, params.clone(), "/database/search").await;
+    // println!("{:#?}", a);
+    let b = search(&cli, params).await;
+    // println!("{:#?}", b);
+    assert!(b.is_ok());
 }
 
 //
